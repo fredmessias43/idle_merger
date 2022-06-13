@@ -12,13 +12,16 @@ class Dragoji extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Draggable(
-      data: emoji.hexcode,
+      data: emoji,
       feedback: Text(emoji.hexcode),
-      child: Column(
-        children: [
-          SvgPicture.asset('assets/emojis/${emoji.hexcode}.svg'),
-          Text(emoji.annotation),
-        ],
+      child: Container(
+        width: 75,
+        child: Column(
+          children: [
+            SvgPicture.asset('assets/emojis/${emoji.hexcode}.svg'),
+            Text(emoji.annotation),
+          ],
+        ),
       ),
     );
   }

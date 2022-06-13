@@ -1,13 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:idle_merger/components/dragoji.dart';
 import 'package:idle_merger/models/emoji.dart';
 
 class Targoji extends StatefulWidget {
-  const Targoji({Key? key, required this.data, this.initialIndex = 0})
+  const Targoji(
+      {Key? key,
+      this.initialIndex = 0,
+      required this.onMerge,
+      required this.emoji})
       : super(key: key);
 
-  final List<Emoji> data;
   final int initialIndex;
+  final Emoji emoji;
+  final void Function(Emoji outsideEmoji, int index) onMerge;
 
   @override
   State<Targoji> createState() => _TargojiState();
@@ -15,13 +21,11 @@ class Targoji extends StatefulWidget {
 
 class _TargojiState extends State<Targoji> {
   late int currentIndex;
-  late Emoji emoji;
 
   @override
   void initState() {
     setState(() {
       currentIndex = widget.initialIndex;
-      emoji = widget.data[currentIndex];
     });
     super.initState();
   }
@@ -30,14 +34,16 @@ class _TargojiState extends State<Targoji> {
   Widget build(BuildContext context) {
     return DragTarget(
       builder: (context, list, anotherList) {
-        return Dragoji(index: currentIndex, emoji: emoji);
+        return Dragoji(index: currentIndex, emoji: widget.emoji);
       },
-      onAccept: (obj) {
-        //debugPrint(emoji.hexcode + ' == ' + obj.toString());
-        String item = obj.toString();
-        if (emoji.hexcode == item) {
-          currentIndex += 1;
-          emoji = widget.data[currentIndex];
+      onAccept: (Emoji outsideEmoji) {
+        // debugPrint(emoji.hexcode + ' == ' + item);
+        if (widget.emoji.hexcode == outsideEmoji.hexcode &&
+            widget.emoji.id != outsideEmoji.id) {
+          setState(() {
+            currentIndex += 1;
+            widget.onMerge(outsideEmoji, currentIndex);
+          });
         }
       },
     );

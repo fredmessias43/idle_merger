@@ -1,0 +1,72 @@
+import 'dart:math';
+
+import 'package:flutter/widgets.dart';
+import 'package:idle_merger/components/targoji.dart';
+
+class Gridoji extends StatefulWidget {
+  const Gridoji({Key? key}) : super(key: key);
+
+  @override
+  State<Gridoji> createState() => _GridojiState();
+}
+
+class _GridojiState extends State<Gridoji> {
+  void change() {
+    setState(() {
+      var rng = Random();
+      currentIndex = rng.nextInt(itemsCount);
+      list = generateList();
+      debugPrint(
+          'height: $height, width: $width, horizontalAxisCount: $horizontalAxisCount, verticalAxisCount: $verticalAxisCount, itemsCount: $itemsCount, currentIndex: $currentIndex');
+    });
+  }
+
+  int currentIndex = 0;
+
+  double boxSize = 150;
+  double toolbarHeight = 55;
+
+  double height = 0;
+  double width = 0;
+
+  int horizontalAxisCount = 0;
+  int verticalAxisCount = 0;
+
+  int itemsCount = 0;
+
+  generateList() {
+    return List.generate(itemsCount, (index) {
+      return currentIndex == index
+          ? Container(
+              height: boxSize,
+              width: boxSize,
+              child: Targoji(
+                data: [],
+                onMerge: () {},
+              ),
+            )
+          : const Text('');
+    });
+  }
+
+  late var list = generateList();
+
+  @override
+  Widget build(BuildContext context) {
+    height = MediaQuery.of(context).size.height - toolbarHeight;
+    width = MediaQuery.of(context).size.width;
+    horizontalAxisCount = (width / boxSize).ceil();
+    verticalAxisCount = (height / boxSize).ceil();
+    itemsCount = verticalAxisCount * horizontalAxisCount;
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: horizontalAxisCount,
+      ),
+      itemCount: itemsCount,
+      itemBuilder: (context, index) {
+        return list[index];
+      },
+    );
+  }
+}
