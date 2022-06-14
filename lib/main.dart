@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
   var list = <Emoji>[];
   var positionsList = <Map<String, double>>[];
 
-  void fillLists({maxItems = 5}) {
+  void fillLists({maxItems = 10}) {
     if (list.length >= maxItems) {
       return;
     }
@@ -80,21 +80,18 @@ class _HomePageState extends State<HomePage> {
     return Positioned(
       left: emoji.x,
       top: emoji.y,
-      child: Container(
-        decoration: BoxDecoration(border: Border.all(color: Colors.blue)),
-        child: Targoji(
-          // initialIndex: 9,
-          emoji: emoji,
-          onMerge: (outsideEmoji, currentIndex) =>
-              onMerge(emoji, outsideEmoji, currentIndex),
-        ),
+      child: Targoji(
+        // initialIndex: 9,
+        key: Key(emoji.id),
+        emoji: emoji,
+        onMerge: (outsideEmoji) => onMerge(emoji, outsideEmoji),
       ),
     );
   }
 
-  void onMerge(currentEmoji, outsideEmoji, currentIndex) {
+  void onMerge(currentEmoji, outsideEmoji) {
     int outsideEmojiIdx = list.indexWhere((item) => item.id == outsideEmoji.id);
-    debugPrint('$outsideEmojiIdx - ${outsideEmoji.id}');
+    // debugPrint('$outsideEmojiIdx - ${outsideEmoji.id}');
     if (outsideEmojiIdx > -1) {
       setState(() {
         list.removeAt(outsideEmojiIdx);
@@ -102,10 +99,15 @@ class _HomePageState extends State<HomePage> {
     }
 
     int currentEmojiIdx = list.indexWhere((item) => item.id == currentEmoji.id);
-    debugPrint('$currentEmojiIdx - ${currentEmoji.id}');
+    // debugPrint('$currentEmojiIdx - ${currentEmoji.id}');
     if (currentEmojiIdx > -1) {
-      list[currentEmojiIdx] =
-          list[currentEmojiIdx].copyFromParent(emojiData[currentIndex]);
+      Emoji newEmoji = list[currentEmojiIdx];
+      newEmoji.index = newEmoji.index + 1;
+      newEmoji = newEmoji.copyFromParent(emojiData[newEmoji.index]);
+
+      setState(() {
+        list[currentEmojiIdx] = newEmoji;
+      });
     }
   }
 

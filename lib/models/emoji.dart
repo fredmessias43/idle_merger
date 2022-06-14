@@ -7,11 +7,13 @@ import 'package:uuid/uuid.dart';
 class Emoji extends OpenmojiEmoji {
   String id = const Uuid().v4();
 
+  int index;
   double x;
   double y;
 
   Emoji(
-      {required this.x,
+      {required this.index,
+      required this.x,
       required this.y,
       required String emoji,
       required String hexcode,
@@ -49,6 +51,7 @@ class Emoji extends OpenmojiEmoji {
     double x = _generateX();
     double y = _generateY();
     return Emoji(
+        index: 0,
         x: x,
         y: y,
         emoji: parent.emoji,
