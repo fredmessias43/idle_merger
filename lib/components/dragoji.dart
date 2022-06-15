@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:idle_merger/components/circular_border.dart';
 import 'package:idle_merger/models/emoji.dart';
 
 class Dragoji extends StatelessWidget {
@@ -9,11 +10,16 @@ class Dragoji extends StatelessWidget {
   final Emoji emoji;
 
   Widget createEmoji() {
-    return Column(
-      children: [
-        SvgPicture.asset('assets/emojis/${emoji.hexcode}.svg'),
-        //Text('${emoji.index}'),
-      ],
+    return Container(
+      width: 75,
+      height: 75,
+      // decoration: BoxDecoration(border: Border.all(style: BorderStyle.solid, color: Colors.black)),
+      child: Column(
+        children: [
+          SvgPicture.asset('assets/emojis/${emoji.hexcode}.svg'),
+          //Text('${emoji.index}'),
+        ],
+      ),
     );
   }
 
@@ -23,11 +29,10 @@ class Dragoji extends StatelessWidget {
       data: emoji,
       feedback: createEmoji(),
       child: createEmoji(),
-      childWhenDragging: Container(
-        width: 75,
-        height: 75,
-        decoration: BoxDecoration(
-            border: Border.all(style: BorderStyle.solid, color: Colors.black)),
+      childWhenDragging: CircularBorder(
+        size: 50,
+        boxSize: 75,
+        child: Container(),
       ),
     );
   }

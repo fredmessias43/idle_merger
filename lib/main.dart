@@ -123,8 +123,23 @@ class _HomePageState extends State<HomePage> {
         width: width,
         child: emojiData.isEmpty
             ? const Text('Carregando...')
-            : Stack(
-                children: list.map((e) => renderEmoji(e)).toList(),
+            : DragTarget<Emoji>(
+                builder: (context, candidateData, rejectedData) {
+                  return Stack(
+                    children: list.map((e) => renderEmoji(e)).toList(),
+                  );
+                },
+                onAcceptWithDetails: (details) {
+                  var emoji = details.data;
+                  var offset = details.offset;
+
+                  var idx = list.indexWhere((em) => em.id == emoji.id);
+
+                  setState(() {
+                    list[idx].x = offset.dx;
+                    list[idx].y = offset.dy;
+                  });
+                },
               ),
       ),
     );
