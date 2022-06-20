@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:idle_merger/components/targoji.dart';
@@ -36,10 +35,20 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   var emojiData = <OpenmojiEmoji>[];
 
-  Future readData() async {
+  final duration = const Duration(seconds: 10);
+  AnimationController? animationController;
+  var progressIndicator = 0.0;
+
+  Timer? timer;
+
+  var rng = Random();
+
+  var list = <Emoji>[];
+
+  Future<void> readData() async {
     var response = await rootBundle.loadString("assets/data/openmoji.json");
     var json = (jsonDecode(response) as List<dynamic>);
 
@@ -50,30 +59,60 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  @override
-  void initState() {
-    readData().then((value) {
-      Timer.periodic(const Duration(seconds: 1), (timer) {
-        fillLists();
+  void startTimer() {
+    if (timer == null) {
+      setState(() {
+        timer = Timer.periodic(duration, (timer) {
+          fillLists();
+        });
       });
-    });
-
-    super.initState();
+    }
   }
 
-  var rng = Random();
+  void cancelTimer() {
+    setState(() {
+      timer?.cancel();
+      timer = null;
+    });
+  }
 
-  var list = <Emoji>[];
-  var positionsList = <Map<String, double>>[];
+  void startAnimation() {
+    if (animationController != null) {
+      animationController?.repeat();
+      return;
+    }
+    setState(() {
+      animationController =
+          AnimationController(duration: duration, vsync: this);
+      animationController?.addListener(() {
+        setState(() {
+          progressIndicator = animationController?.value ?? 0;
+        });
+      });
+      animationController?.forward();
+    });
+  }
+
+  void cancelAnimation() {
+    setState(() {
+      animationController?.stop();
+      progressIndicator = 0;
+      animationController?.dispose();
+      animationController = null;
+    });
+  }
 
   void fillLists({maxItems = 10}) {
     if (list.length >= maxItems) {
+      cancelAnimation();
+      cancelTimer();
       return;
     }
 
     setState(() {
       list.add(Emoji.fromParent(emojiData[0]));
     });
+    startAnimation();
   }
 
   Widget renderEmoji(Emoji emoji) {
@@ -109,6 +148,19 @@ class _HomePageState extends State<HomePage> {
         list[currentEmojiIdx] = newEmoji;
       });
     }
+
+    startTimer();
+    startAnimation();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    readData().then((_) {
+      startTimer();
+      startAnimation();
+    });
   }
 
   @override
@@ -126,7 +178,21 @@ class _HomePageState extends State<HomePage> {
             : DragTarget<Emoji>(
                 builder: (context, candidateData, rejectedData) {
                   return Stack(
-                    children: list.map((e) => renderEmoji(e)).toList(),
+                    children: [
+                      Positioned(
+                        left: (width / 2) - (width / 4) / 2,
+                        top: 15,
+                        child: SizedBox(
+                          width: width / 4,
+                          height: 15,
+                          child: LinearProgressIndicator(
+                            value: progressIndicator,
+                            backgroundColor: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      ...list.map((e) => renderEmoji(e)).toList()
+                    ],
                   );
                 },
                 onAcceptWithDetails: (details) {
